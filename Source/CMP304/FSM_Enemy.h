@@ -6,6 +6,14 @@
 #include "GameFramework/Character.h"
 #include "FSM_Enemy.generated.h"
 
+UENUM(BlueprintType)
+enum class ECharState : uint8
+{
+	Patrol		UMETA(DisplayName = "Patrol"),
+	Chase		UMETA(DisplayName = "Chase"),
+	Attack		UMETA(DisplayName = "Attack")
+};
+
 UCLASS()
 class CMP304_API AFSM_Enemy : public ACharacter
 {
@@ -52,6 +60,10 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		float StoppingDistance = 100.0f;
+
+
+	UPROPERTY(VisibleAnywhere)
+		ECharState state = ECharState(0);
 
 	FTimerHandle SeekPlayerTimerHandle;
 

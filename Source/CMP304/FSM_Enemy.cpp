@@ -27,7 +27,6 @@ AFSM_Enemy::AFSM_Enemy()
 
 	DamageCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Damage Collision"));
 	DamageCollision->SetupAttachment(GetMesh(), TEXT("RightHandSocket"));
-
 }
 
 // Called when the game starts or when spawned
@@ -36,24 +35,34 @@ void AFSM_Enemy::BeginPlay()
 	Super::BeginPlay();
 
 	AIController = Cast<AFSM_EnemyController>(GetController());
-	AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject
-	(this, &AFSM_Enemy::OnAIMoveCompleted);
 
-	PlayerCollisionDetection->OnComponentBeginOverlap.AddDynamic(this,
-		&AFSM_Enemy::OnPlayerDetectedOverlapBegin);
+	switch (state)
+	{
+		case ECharState(0):
 
-	PlayerCollisionDetection->OnComponentEndOverlap.AddDynamic(this,
-		&AFSM_Enemy::OnPlayerDetectedOverlapEnd);
+		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject
+		(this, &AFSM_Enemy::OnAIMoveCompleted);
+		
+		PlayerCollisionDetection->OnComponentBeginOverlap.AddDynamic(this,
+			&AFSM_Enemy::OnPlayerDetectedOverlapBegin);
 
-	PlayerAttackCollisionDetection->OnComponentBeginOverlap.AddDynamic(this,
-		&AFSM_Enemy::OnPlayerAttackOverlapBegin);
+		PlayerCollisionDetection->OnComponentEndOverlap.AddDynamic(this,
+			&AFSM_Enemy::OnPlayerDetectedOverlapEnd);
 
-	PlayerAttackCollisionDetection->OnComponentEndOverlap.AddDynamic(this,
-		&AFSM_Enemy::OnPlayerAttackOverlapEnd);
+		PlayerAttackCollisionDetection->OnComponentBeginOverlap.AddDynamic(this,
+			&AFSM_Enemy::OnPlayerAttackOverlapBegin);
 
-	DamageCollision->OnComponentBeginOverlap.AddDynamic(this,
-		&AFSM_Enemy::OnDealDamageOverlapBegin);
-	
+		PlayerAttackCollisionDetection->OnComponentEndOverlap.AddDynamic(this,
+			&AFSM_Enemy::OnPlayerAttackOverlapEnd);
+
+		DamageCollision->OnComponentBeginOverlap.AddDynamic(this,
+			&AFSM_Enemy::OnDealDamageOverlapBegin);
+		break;
+
+		default:
+			break;
+	}
+
 }
 
 // Called every frame
@@ -81,7 +90,7 @@ void AFSM_Enemy::OnAIMoveCompleted(FAIRequestID RequestID, const FPathFollowingR
 		StopSeekingPlayer();
 
 		// attack player
-		UE_LOG(LogTemp, Warning, TEXT("Player ATTACKED"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Attacked"));
 	}
 }
 
@@ -149,7 +158,7 @@ void AFSM_Enemy::OnDealDamageOverlapBegin(UPrimitiveComponent* OverlappedComp, A
 	if (PlayerREF && CanDealDamage)
 	{
 		// deal damage to player
-		UE_LOG(LogTemp, Warning, TEXT("Player Damaged"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player damaged!"));
 	}
 }
 
