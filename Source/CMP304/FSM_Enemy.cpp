@@ -59,6 +59,14 @@ void AFSM_Enemy::BeginPlay()
 			&AFSM_Enemy::OnDealDamageOverlapBegin);
 		break;
 
+		case ECharState(1):
+
+			break;
+
+		case ECharState(2):
+
+			break;
+
 		default:
 			break;
 	}
