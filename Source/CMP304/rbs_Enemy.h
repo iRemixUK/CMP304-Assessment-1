@@ -34,33 +34,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
-public:
-
-	bool PlayerSpotted;
-	bool InAttackRange;
-
-	class ACMP304Character* Player;
-
-	UPROPERTY(EditAnywhere)
-		class USphereComponent* PlayerDetection;
-
-	UPROPERTY(EditAnywhere)
-		class USphereComponent* AttackDetection;
-
-	class ARBS_EnemyController* AIController;
-
-	void AIMoveFinished(struct FAIRequestID RequestID, const struct FPathFollowingResult& Result);
-
-	UPROPERTY(EditAnywhere)
-		float StoppingDistance = 100.0f;
-	
-	// 0 for patrol, 1 for chase, 2 for attack.
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-		int state = 0;
-
-	FTimerHandle SeekPlayerTimerHandle;
-
+	// Functions
 	UFUNCTION()
 		void MoveToPlayer();
 
@@ -89,4 +63,28 @@ public:
 		void AttackRangeOverlapEnd(class UPrimitiveComponent* OverlappedComp,
 			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex);
+
+	// Variables 
+	bool PlayerSpotted;
+	bool InAttackRange;
+
+	class ACMP304Character* Player;
+	class ARBS_EnemyController* AIController;
+
+	UPROPERTY(EditAnywhere)
+		class USphereComponent* PlayerDetection;
+
+	UPROPERTY(EditAnywhere)
+		class USphereComponent* AttackDetection;
+
+	void AIMoveFinished(struct FAIRequestID RequestID, const struct FPathFollowingResult& Result);
+
+	UPROPERTY(EditAnywhere)
+		float StoppingDistance = 100.0f;
+	
+	// 0 for patrol, 1 for chase, 2 for attack.
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+		int state = 0;
+
+	FTimerHandle TimerHandle;
 };

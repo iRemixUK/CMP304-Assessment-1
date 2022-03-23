@@ -16,9 +16,7 @@ void ARBS_EnemyController::Patrol()
 {
     if (Navigation)
     {
-        Navigation->K2_GetRandomReachablePointInRadius(GetWorld(), GetPawn()->GetActorLocation(),
-            RandomLocation, 10000.0f);
-
+        Navigation->K2_GetRandomReachablePointInRadius(GetWorld(), GetPawn()->GetActorLocation(), RandomLocation, 10000.0f);
         MoveToLocation(RandomLocation);
     }
 }

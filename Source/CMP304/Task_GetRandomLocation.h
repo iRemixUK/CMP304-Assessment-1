@@ -13,12 +13,9 @@ UCLASS()
 class CMP304_API UTask_GetRandomLocation : public UBTTaskNode
 {
 	GENERATED_BODY()
-	
-private:
-
-	class UNavigationSystemV1* Navigation;
 
 	FVector RandomLocation;
+	class UNavigationSystemV1* Navigation;
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 		uint8* NodeMemory) override;

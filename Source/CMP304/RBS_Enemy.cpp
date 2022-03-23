@@ -35,24 +35,19 @@ void Arbs_Enemy::BeginPlay()
 		AIController = Cast<ARBS_EnemyController>(GetController());
 
 		// AIMoveFinished connected to on request finished event which lets us know when the ai movement has finished.
-		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject
-			(this, &Arbs_Enemy::AIMoveFinished);
+		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &Arbs_Enemy::AIMoveFinished);
 
 		// Spots player when in range
-		PlayerDetection->OnComponentBeginOverlap.AddDynamic(this,
-			&Arbs_Enemy::PlayerSpottedOverlapBegin);
+		PlayerDetection->OnComponentBeginOverlap.AddDynamic(this, &Arbs_Enemy::PlayerSpottedOverlapBegin);
 	
 		// Loses sight of player when no longer in range
-		PlayerDetection->OnComponentEndOverlap.AddDynamic(this,
-			&Arbs_Enemy::PlayerSpottedOverlapEnd);
+		PlayerDetection->OnComponentEndOverlap.AddDynamic(this, &Arbs_Enemy::PlayerSpottedOverlapEnd);
 
 		// Attacks player when in range
-		AttackDetection->OnComponentBeginOverlap.AddDynamic(this,
-			&Arbs_Enemy::AttackRangeOverlapBegin);
+		AttackDetection->OnComponentBeginOverlap.AddDynamic(this, &Arbs_Enemy::AttackRangeOverlapBegin);
 
 		// Stops attacking when no longer in range
-		AttackDetection->OnComponentEndOverlap.AddDynamic(this,
-			&Arbs_Enemy::AttackRangeOverlapEnd);
+		AttackDetection->OnComponentEndOverlap.AddDynamic(this, &Arbs_Enemy::AttackRangeOverlapEnd);
 }
 
 // Called every frame
@@ -94,14 +89,13 @@ void Arbs_Enemy::FindPlayer()
 	// This ensures that the AI is moving to the updated position of the player 
 	MoveToPlayer();
 
-	GetWorld()->GetTimerManager().SetTimer(SeekPlayerTimerHandle, this,
-		&Arbs_Enemy::FindPlayer, 0.25f, true);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &Arbs_Enemy::FindPlayer, 0.25f, true);
 }
 
 void Arbs_Enemy::StopFindingPlayer()
 {
 	// Stops looking for player by clearing the retriggable timer
-	GetWorld()->GetTimerManager().ClearTimer(SeekPlayerTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 }
 
 // Detects player

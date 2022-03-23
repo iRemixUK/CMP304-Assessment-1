@@ -10,18 +10,16 @@ EBTNodeResult::Type UTask_GetRandomLocation::ExecuteTask(UBehaviorTreeComponent&
 
 	if (Navigation)
 	{
-		Navigation->K2_GetRandomReachablePointInRadius(GetWorld(),
-			GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation(),
-			RandomLocation, 10000.0f);
+		// Choose a random location within the navigation area.
+		Navigation->K2_GetRandomReachablePointInRadius(GetWorld(), GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation(), RandomLocation, 10000.0f);
 	}
+
 	else
 	{
 		return EBTNodeResult::Failed;
 	}
 
 	// inform blackboard about random location result
-	OwnerComp.GetBlackboardComponent()
-		->SetValueAsVector(FName("Random Patrol Location"), RandomLocation);
-
+	OwnerComp.GetBlackboardComponent()->SetValueAsVector(FName("Random Patrol Location"), RandomLocation);
 	return EBTNodeResult::Succeeded;
 }

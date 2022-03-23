@@ -18,11 +18,8 @@ ABT_EnemyController::ABT_EnemyController()
 void ABT_EnemyController::BeginPlay()
 {
 	Super::BeginPlay();
-
 	PawnSensing->OnSeePawn.AddDynamic(this, &ABT_EnemyController::PlayerSpotted);
-
 	RunBehaviorTree(BehaviourTree);
-
 }
 
 void ABT_EnemyController::PlayerSpotted(APawn* PlayerPawn)
@@ -33,6 +30,7 @@ void ABT_EnemyController::PlayerSpotted(APawn* PlayerPawn)
 	{
 		SetPlayerSpotted(true, Player);
 		CantSeePlayer();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player Spotted"));
 	}
 }
 
@@ -40,16 +38,13 @@ void ABT_EnemyController::SetPlayerSpotted(bool PlayerSpotted, UObject* Player)
 {
 	if (PlayerSpotted)
 	{
-		GetBlackboardComponent()
-			->SetValueAsBool(FName("Player Spotted"), PlayerSpotted);
+		GetBlackboardComponent()->SetValueAsBool(FName("Player Spotted"), PlayerSpotted);
 
-		GetBlackboardComponent()
-			->SetValueAsObject(FName("Player Target"), Player);
+		GetBlackboardComponent()->SetValueAsObject(FName("Player Target"), Player);
 	}
 	else
 	{
-		GetBlackboardComponent()
-			->SetValueAsBool(FName("Player Spotted"), PlayerSpotted);
+		GetBlackboardComponent()->SetValueAsBool(FName("Player Spotted"), PlayerSpotted);
 	}
 }
 
@@ -60,9 +55,7 @@ void ABT_EnemyController::CantSeePlayer()
 	// The guard has lost sight of the player
 	GetWorld()->GetTimerManager().ClearTimer(RetriggerableTimerHandle);
 
-	FunctionDelegate.BindUFunction(this, FName("PlayerSpotted"),
-		false, GetPawn());
+	FunctionDelegate.BindUFunction(this, FName("SetPlayerSpotted"), false, GetPawn());
 
-	GetWorld()->GetTimerManager().SetTimer(RetriggerableTimerHandle,
-		FunctionDelegate, PawnSensing->SensingInterval + 0.1f, false);
+	GetWorld()->GetTimerManager().SetTimer(RetriggerableTimerHandle, FunctionDelegate, PawnSensing->SensingInterval + 0.1f, false);
 }
