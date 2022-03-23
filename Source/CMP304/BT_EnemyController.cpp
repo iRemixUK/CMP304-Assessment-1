@@ -18,9 +18,9 @@ ABT_EnemyController::ABT_EnemyController()
 void ABT_EnemyController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	PawnSensing->OnSeePawn.AddDynamic(this, &ABT_EnemyController::PlayerSpotted);
-	
+
 	RunBehaviorTree(BehaviourTree);
 
 }

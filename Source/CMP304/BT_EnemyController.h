@@ -6,15 +6,13 @@
 #include "AIController.h"
 #include "BT_EnemyController.generated.h"
 
-/**
- * 
- */
-UCLASS()
-class CMP304_API ABT_EnemyController : public AAIController
+
+	UCLASS()
+	class CMP304_API ABT_EnemyController : public AAIController
 {
 	GENERATED_BODY()
 
-	ABT_EnemyController();
+		ABT_EnemyController();
 public:
 	void BeginPlay() override;
 
@@ -27,7 +25,7 @@ public:
 	UFUNCTION()
 		void PlayerSpotted(APawn* PlayerPawn);
 
-	UFUNCTION() 
+	UFUNCTION()
 		void SetPlayerSpotted(bool PlayerSpotted, class UObject* Player);
 
 	FTimerHandle RetriggerableTimerHandle;
