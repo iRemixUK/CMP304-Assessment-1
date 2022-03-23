@@ -8,16 +8,16 @@ void ARBS_EnemyController::BeginPlay()
 {
     Super::BeginPlay();
 
-    NavArea = FNavigationSystem::GetCurrent<UNavigationSystemV1>(this);
-    RandomPatrol();
+    Navigation = FNavigationSystem::GetCurrent<UNavigationSystemV1>(this);
+    Patrol();
 }
 
-void ARBS_EnemyController::RandomPatrol()
+void ARBS_EnemyController::Patrol()
 {
-    if (NavArea)
+    if (Navigation)
     {
-        NavArea->K2_GetRandomReachablePointInRadius(GetWorld(), GetPawn()->GetActorLocation(),
-            RandomLocation, 15000.0f);
+        Navigation->K2_GetRandomReachablePointInRadius(GetWorld(), GetPawn()->GetActorLocation(),
+            RandomLocation, 10000.0f);
 
         MoveToLocation(RandomLocation);
     }

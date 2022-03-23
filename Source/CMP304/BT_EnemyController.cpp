@@ -19,29 +19,29 @@ void ABT_EnemyController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	PawnSensing->OnSeePawn.AddDynamic(this, &ABT_EnemyController::OnSeePawn);
+	PawnSensing->OnSeePawn.AddDynamic(this, &ABT_EnemyController::PlayerSpotted);
 	
-	RunBehaviorTree(BehaviorTree);
+	RunBehaviorTree(BehaviourTree);
 
 }
 
-void ABT_EnemyController::OnSeePawn(APawn* PlayerPawn)
+void ABT_EnemyController::PlayerSpotted(APawn* PlayerPawn)
 {
 	ACMP304Character* Player = Cast<ACMP304Character>(PlayerPawn);
 
 	if (Player)
 	{
-		SetCanSeePlayer(true, Player);
-		RunRetriggerableTimer();
+		SetPlayerSpotted(true, Player);
+		CantSeePlayer();
 	}
 }
 
-void ABT_EnemyController::SetCanSeePlayer(bool SeePlayer, UObject* Player)
+void ABT_EnemyController::SetPlayerSpotted(bool PlayerSpotted, UObject* Player)
 {
-	if (SeePlayer)
+	if (PlayerSpotted)
 	{
 		GetBlackboardComponent()
-			->SetValueAsBool(FName("Can See Player"), SeePlayer);
+			->SetValueAsBool(FName("Player Spotted"), PlayerSpotted);
 
 		GetBlackboardComponent()
 			->SetValueAsObject(FName("Player Target"), Player);
@@ -49,18 +49,18 @@ void ABT_EnemyController::SetCanSeePlayer(bool SeePlayer, UObject* Player)
 	else
 	{
 		GetBlackboardComponent()
-			->SetValueAsBool(FName("Can See Player"), SeePlayer);
-
-		ACharacter* EnemyChar = Cast<ACharacter>(GetPawn());
-		EnemyChar->GetMesh()->GetAnimInstance()->StopAllMontages(0);
+			->SetValueAsBool(FName("Player Spotted"), PlayerSpotted);
 	}
 }
 
-void ABT_EnemyController::RunRetriggerableTimer()
+void ABT_EnemyController::CantSeePlayer()
 {
+	// Sets player spotted to false every 0.1 seconds after the pawn sensing interval
+	// This means that if the player has not been spotted 0.1 seconds after the interval
+	// The guard has lost sight of the player
 	GetWorld()->GetTimerManager().ClearTimer(RetriggerableTimerHandle);
 
-	FunctionDelegate.BindUFunction(this, FName("SetCanSeePlayer"),
+	FunctionDelegate.BindUFunction(this, FName("PlayerSpotted"),
 		false, GetPawn());
 
 	GetWorld()->GetTimerManager().SetTimer(RetriggerableTimerHandle,

@@ -19,18 +19,19 @@ public:
 	void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		class UBehaviorTree* BehaviorTree;
+		class UBehaviorTree* BehaviourTree;
 
 	UPROPERTY(EditAnywhere)
 		class UPawnSensingComponent* PawnSensing;
 
 	UFUNCTION()
-		void OnSeePawn(APawn* PlayerPawn);
+		void PlayerSpotted(APawn* PlayerPawn);
 
-	UFUNCTION()
-		void SetCanSeePlayer(bool SeePlayer, class UObject* Player);
+	UFUNCTION() 
+		void SetPlayerSpotted(bool PlayerSpotted, class UObject* Player);
 
 	FTimerHandle RetriggerableTimerHandle;
 	FTimerDelegate FunctionDelegate;
-	void RunRetriggerableTimer();
+
+	void CantSeePlayer();
 };

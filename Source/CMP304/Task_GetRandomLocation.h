@@ -16,7 +16,7 @@ class CMP304_API UTask_GetRandomLocation : public UBTTaskNode
 	
 private:
 
-	class UNavigationSystemV1* NavArea;
+	class UNavigationSystemV1* Navigation;
 
 	FVector RandomLocation;
 

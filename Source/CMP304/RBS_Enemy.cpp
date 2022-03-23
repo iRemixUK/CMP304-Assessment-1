@@ -15,18 +15,15 @@ Arbs_Enemy::Arbs_Enemy()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	PlayerCollisionDetection =
+	PlayerDetection =
 		CreateDefaultSubobject<USphereComponent>(TEXT("Player Collision Detection"));
 
-	PlayerCollisionDetection->SetupAttachment(RootComponent);
+	PlayerDetection->SetupAttachment(RootComponent);
 
-	PlayerAttackCollisionDetection =
+	AttackDetection =
 		CreateDefaultSubobject<USphereComponent>(TEXT("Player Attack Collision Detection"));
 
-	PlayerAttackCollisionDetection->SetupAttachment(RootComponent);
-
-	DamageCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Damage Collision"));
-	DamageCollision->SetupAttachment(GetMesh(), TEXT("RightHandSocket"));
+	AttackDetection->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -34,131 +31,127 @@ void Arbs_Enemy::BeginPlay()
 {
 		Super::BeginPlay();
 
+		// Gets AI controller
 		AIController = Cast<ARBS_EnemyController>(GetController());
 
-		// Patrol state
+		// AIMoveFinished connected to on request finished event which lets us know when the ai movement has finished.
 		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject
-			(this, &Arbs_Enemy::OnAIMoveCompleted);
+			(this, &Arbs_Enemy::AIMoveFinished);
 
-		// Detects player 
-		PlayerCollisionDetection->OnComponentBeginOverlap.AddDynamic(this,
-			&Arbs_Enemy::OnPlayerDetectedOverlapBegin);
+		// Spots player when in range
+		PlayerDetection->OnComponentBeginOverlap.AddDynamic(this,
+			&Arbs_Enemy::PlayerSpottedOverlapBegin);
 	
-		PlayerCollisionDetection->OnComponentEndOverlap.AddDynamic(this,
-			&Arbs_Enemy::OnPlayerDetectedOverlapEnd);
+		// Loses sight of player when no longer in range
+		PlayerDetection->OnComponentEndOverlap.AddDynamic(this,
+			&Arbs_Enemy::PlayerSpottedOverlapEnd);
 
-		PlayerAttackCollisionDetection->OnComponentBeginOverlap.AddDynamic(this,
-			&Arbs_Enemy::OnPlayerAttackOverlapBegin);
+		// Attacks player when in range
+		AttackDetection->OnComponentBeginOverlap.AddDynamic(this,
+			&Arbs_Enemy::AttackRangeOverlapBegin);
 
-		PlayerAttackCollisionDetection->OnComponentEndOverlap.AddDynamic(this,
-			&Arbs_Enemy::OnPlayerAttackOverlapEnd);
-
-		DamageCollision->OnComponentBeginOverlap.AddDynamic(this,
-			&Arbs_Enemy::OnDealDamageOverlapBegin);
+		// Stops attacking when no longer in range
+		AttackDetection->OnComponentEndOverlap.AddDynamic(this,
+			&Arbs_Enemy::AttackRangeOverlapEnd);
 }
-
 
 // Called every frame
 void Arbs_Enemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
 void Arbs_Enemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
-void Arbs_Enemy::OnAIMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
+void Arbs_Enemy::AIMoveFinished(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
-	if (!PlayerDetected)
+	if (!PlayerSpotted)
 	{
-		AIController->RandomPatrol();
+		// Player not spotted / no longer spotted so start patrolling again
+		AIController->Patrol();
 	}
-	else if (PlayerDetected && CanAttackPlayer)
+	else if (PlayerSpotted && InAttackRange)
 	{
-		StopSeekingPlayer();
-
-		// attack player
+		// Stops looking for player and attacks them
+		StopFindingPlayer();
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Attacked"));
 	}
 }
 
 void Arbs_Enemy::MoveToPlayer()
 {
-	AIController->MoveToLocation(PlayerREF->GetActorLocation(), StoppingDistance, true);
+	// Travels to player's location
+	AIController->MoveToLocation(Player->GetActorLocation(), StoppingDistance, true);
 }
 
-void Arbs_Enemy::SeekPlayer()
+void Arbs_Enemy::FindPlayer()
 {
+	// Calls move to player function every 0.25 seconds
+	// This ensures that the AI is moving to the updated position of the player 
 	MoveToPlayer();
+
 	GetWorld()->GetTimerManager().SetTimer(SeekPlayerTimerHandle, this,
-		&Arbs_Enemy::SeekPlayer, 0.25f, true);
+		&Arbs_Enemy::FindPlayer, 0.25f, true);
 }
 
-void Arbs_Enemy::StopSeekingPlayer()
+void Arbs_Enemy::StopFindingPlayer()
 {
+	// Stops looking for player by clearing the retriggable timer
 	GetWorld()->GetTimerManager().ClearTimer(SeekPlayerTimerHandle);
 }
 
 // Detects player
-void Arbs_Enemy::OnPlayerDetectedOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void Arbs_Enemy::PlayerSpottedOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	PlayerREF = Cast<ACMP304Character>(OtherActor);
-	if (PlayerREF)
-	{
-		PlayerDetected = true;
-		SeekPlayer();
+	// Player has overlapped with enemy line of sight, so enemy has spotted the player
+	Player = Cast<ACMP304Character>(OtherActor);
 
+	if (Player)
+	{
+		PlayerSpotted = true;
+		FindPlayer();
 	}
 }
 
-void Arbs_Enemy::OnPlayerDetectedOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void Arbs_Enemy::PlayerSpottedOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	PlayerREF = Cast<ACMP304Character>(OtherActor);
-	if (PlayerREF)
+	// Player no longer in the enemy line of sight, so the player is no longer spotted and will go back to patrolling.
+	Player = Cast<ACMP304Character>(OtherActor);
+
+	if (Player)
 	{
-		state = 0;
-		PlayerDetected = false;
-		StopSeekingPlayer();
-		AIController->RandomPatrol();
+		PlayerSpotted = false;
+		StopFindingPlayer();
+		AIController->Patrol();
 	}
 }
 
-void Arbs_Enemy::OnPlayerAttackOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void Arbs_Enemy::AttackRangeOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	PlayerREF = Cast<ACMP304Character>(OtherActor);
-	if (PlayerREF)
+	// Player is in attack range
+	Player = Cast<ACMP304Character>(OtherActor);
+
+	if (Player)
 	{
-		CanAttackPlayer = true;
-		CanDealDamage = true;
-		state = 2;
+		InAttackRange = true;
 	}
 }
 
-void Arbs_Enemy::OnPlayerAttackOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void Arbs_Enemy::AttackRangeOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	PlayerREF = Cast<ACMP304Character>(OtherActor);
-	if (PlayerREF)
+	// Player no longer in attack range
+	Player = Cast<ACMP304Character>(OtherActor);
+
+	if (Player)
 	{
-		CanAttackPlayer = false;
-
-		SeekPlayer();
-
-		state = 1;
+		InAttackRange = false;
+		FindPlayer();
 	}
 }
 
-void Arbs_Enemy::OnDealDamageOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	PlayerREF = Cast<ACMP304Character>(OtherActor);
-	if (PlayerREF && CanDealDamage)
-	{
-		// deal damage to player
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player damaged!"));
-	}
-}
+
 

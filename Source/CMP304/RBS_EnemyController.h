@@ -6,9 +6,6 @@
 #include "AIController.h"
 #include "RBS_EnemyController.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class CMP304_API ARBS_EnemyController : public AAIController
 {
@@ -16,15 +13,11 @@ class CMP304_API ARBS_EnemyController : public AAIController
 	
 public:
     void BeginPlay() override;
+    
+    UFUNCTION(BlueprintCallable)
+        void Patrol();
 
 private:
-
-    class UNavigationSystemV1* NavArea;
-
     FVector RandomLocation;
-
-public:
-
-    UFUNCTION(BlueprintCallable)
-        void RandomPatrol();
+    class UNavigationSystemV1* Navigation;
 };

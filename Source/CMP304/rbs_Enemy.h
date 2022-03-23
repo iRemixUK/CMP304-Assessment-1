@@ -37,26 +37,20 @@ public:
 
 public:
 
-	bool PlayerDetected;
-	bool CanAttackPlayer;
+	bool PlayerSpotted;
+	bool InAttackRange;
 
-	UPROPERTY(BlueprintReadWrite)
-		bool CanDealDamage;
-
-	class ACMP304Character* PlayerREF;
+	class ACMP304Character* Player;
 
 	UPROPERTY(EditAnywhere)
-		class USphereComponent* PlayerCollisionDetection;
+		class USphereComponent* PlayerDetection;
 
 	UPROPERTY(EditAnywhere)
-		class USphereComponent* PlayerAttackCollisionDetection;
-
-	UPROPERTY(EditAnywhere)
-		class UBoxComponent* DamageCollision;
+		class USphereComponent* AttackDetection;
 
 	class ARBS_EnemyController* AIController;
 
-	void OnAIMoveCompleted(struct FAIRequestID RequestID, const struct FPathFollowingResult& Result);
+	void AIMoveFinished(struct FAIRequestID RequestID, const struct FPathFollowingResult& Result);
 
 	UPROPERTY(EditAnywhere)
 		float StoppingDistance = 100.0f;
@@ -71,33 +65,28 @@ public:
 		void MoveToPlayer();
 
 	UFUNCTION()
-		void SeekPlayer();
+		void FindPlayer();
 
 	UFUNCTION()
-		void StopSeekingPlayer();
+		void StopFindingPlayer();
 
 	UFUNCTION()
-		void OnPlayerDetectedOverlapBegin(class UPrimitiveComponent* OverlappedComp,
+		void PlayerSpottedOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-		void OnPlayerDetectedOverlapEnd(class UPrimitiveComponent* OverlappedComp,
+		void PlayerSpottedOverlapEnd(class UPrimitiveComponent* OverlappedComp,
 			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex);
 
 	UFUNCTION()
-		void OnPlayerAttackOverlapBegin(class UPrimitiveComponent* OverlappedComp,
+		void AttackRangeOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-		void OnPlayerAttackOverlapEnd(class UPrimitiveComponent* OverlappedComp,
+		void AttackRangeOverlapEnd(class UPrimitiveComponent* OverlappedComp,
 			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex);
-
-	UFUNCTION()
-		void OnDealDamageOverlapBegin(class UPrimitiveComponent* OverlappedComp,
-			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

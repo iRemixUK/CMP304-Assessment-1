@@ -6,13 +6,13 @@
 
 EBTNodeResult::Type UTask_GetRandomLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	NavArea = FNavigationSystem::GetCurrent<UNavigationSystemV1>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	Navigation = FNavigationSystem::GetCurrent<UNavigationSystemV1>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 
-	if (NavArea)
+	if (Navigation)
 	{
-		NavArea->K2_GetRandomReachablePointInRadius(GetWorld(),
+		Navigation->K2_GetRandomReachablePointInRadius(GetWorld(),
 			GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation(),
-			RandomLocation, 15000.0f);
+			RandomLocation, 10000.0f);
 	}
 	else
 	{
