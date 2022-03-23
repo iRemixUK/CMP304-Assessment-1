@@ -18,6 +18,11 @@ ABT_EnemyController::ABT_EnemyController()
 void ABT_EnemyController::BeginPlay()
 {
 	Super::BeginPlay();
+	RunTreeAndSensing();
+}
+
+void ABT_EnemyController::RunTreeAndSensing()
+{
 	PawnSensing->OnSeePawn.AddDynamic(this, &ABT_EnemyController::PlayerSpotted);
 	RunBehaviorTree(BehaviourTree);
 }
@@ -31,19 +36,29 @@ void ABT_EnemyController::PlayerSpotted(APawn* PlayerPawn)
 		SetPlayerSpotted(true, Player);
 		CantSeePlayer();
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player Spotted"));
+
+		FVector PlayerLocation = Player->GetActorLocation();
+		FVector Distance = PlayerLocation - GetPawn()->GetActorLocation();
+
+		// Check if guard is within 200 units of player, if so attack them. 
+		if (Distance.Size() <= 200.f)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Attacked"));
+		}
 	}
 }
 
 void ABT_EnemyController::SetPlayerSpotted(bool PlayerSpotted, UObject* Player)
 {
-	if (PlayerSpotted)
+	if (PlayerSpotted == true)
 	{
+		// Sets spotted to true in blackboard if player has been detected. Also sets player target so guard can chase player.
 		GetBlackboardComponent()->SetValueAsBool(FName("Player Spotted"), PlayerSpotted);
-
 		GetBlackboardComponent()->SetValueAsObject(FName("Player Target"), Player);
 	}
 	else
 	{
+		// Sets spotted to false in blackboard if player has not been detected
 		GetBlackboardComponent()->SetValueAsBool(FName("Player Spotted"), PlayerSpotted);
 	}
 }
@@ -57,5 +72,5 @@ void ABT_EnemyController::CantSeePlayer()
 
 	FunctionDelegate.BindUFunction(this, FName("SetPlayerSpotted"), false, GetPawn());
 
-	GetWorld()->GetTimerManager().SetTimer(RetriggerableTimerHandle, FunctionDelegate, PawnSensing->SensingInterval + 0.1f, false);
+	GetWorld()->GetTimerManager().SetTimer(RetriggerableTimerHandle, FunctionDelegate, PawnSensing->SensingInterval * 2.f, false);
 }

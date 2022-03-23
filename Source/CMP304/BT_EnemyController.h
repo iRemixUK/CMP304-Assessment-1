@@ -13,7 +13,11 @@ class CMP304_API ABT_EnemyController : public AAIController
 	ABT_EnemyController();
 
 public:
+	UFUNCTION(BlueprintCallable)
 	void BeginPlay() override;
+	
+	UFUNCTION(BlueprintCallable)
+		void RunTreeAndSensing();
 
 	UFUNCTION()
 		void PlayerSpotted(APawn* PlayerPawn);

@@ -15,13 +15,11 @@ Arbs_Enemy::Arbs_Enemy()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	PlayerDetection =
-		CreateDefaultSubobject<USphereComponent>(TEXT("Player Collision Detection"));
+	PlayerDetection =CreateDefaultSubobject<USphereComponent>(TEXT("Player Collision Detection"));
 
 	PlayerDetection->SetupAttachment(RootComponent);
 
-	AttackDetection =
-		CreateDefaultSubobject<USphereComponent>(TEXT("Player Attack Collision Detection"));
+	AttackDetection =CreateDefaultSubobject<USphereComponent>(TEXT("Player Attack Collision Detection"));
 
 	AttackDetection->SetupAttachment(RootComponent);
 }
