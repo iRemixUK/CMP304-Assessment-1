@@ -65,9 +65,9 @@ void ABT_EnemyController::SetPlayerSpotted(bool PlayerSpotted, UObject* Player)
 
 void ABT_EnemyController::CantSeePlayer()
 {
-	// Sets player spotted to false every 0.1 seconds after the pawn sensing interval
-	// This means that if the player has not been spotted 0.1 seconds after the interval
-	// The guard has lost sight of the player
+	// Sets player spotted to false after two pawn sensing intervals
+	// this means that if the player has not been spotted after 2 cycles
+	// the guard has lost sight of the player
 	GetWorld()->GetTimerManager().ClearTimer(RetriggerableTimerHandle);
 
 	FunctionDelegate.BindUFunction(this, FName("SetPlayerSpotted"), false, GetPawn());

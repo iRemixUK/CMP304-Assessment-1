@@ -35,17 +35,8 @@ void Arbs_Enemy::BeginPlay()
 		// AIMoveFinished connected to on request finished event which lets us know when the ai movement has finished.
 		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &Arbs_Enemy::AIMoveFinished);
 
-		// Spots player when in range
-		PlayerDetection->OnComponentBeginOverlap.AddDynamic(this, &Arbs_Enemy::PlayerSpottedOverlapBegin);
-	
-		// Loses sight of player when no longer in range
-		PlayerDetection->OnComponentEndOverlap.AddDynamic(this, &Arbs_Enemy::PlayerSpottedOverlapEnd);
-
-		// Attacks player when in range
-		AttackDetection->OnComponentBeginOverlap.AddDynamic(this, &Arbs_Enemy::AttackRangeOverlapBegin);
-
-		// Stops attacking when no longer in range
-		AttackDetection->OnComponentEndOverlap.AddDynamic(this, &Arbs_Enemy::AttackRangeOverlapEnd);
+		PlayerSpottedOverlap();
+		AttackOverlap();
 }
 
 // Called every frame
@@ -143,6 +134,24 @@ void Arbs_Enemy::AttackRangeOverlapEnd(UPrimitiveComponent* OverlappedComp, AAct
 		InAttackRange = false;
 		FindPlayer();
 	}
+}
+
+void Arbs_Enemy::PlayerSpottedOverlap()
+{
+	// Spots player when in range
+	PlayerDetection->OnComponentBeginOverlap.AddDynamic(this, &Arbs_Enemy::PlayerSpottedOverlapBegin);
+
+	// Loses sight of player when no longer in range
+	PlayerDetection->OnComponentEndOverlap.AddDynamic(this, &Arbs_Enemy::PlayerSpottedOverlapEnd);
+}
+
+void Arbs_Enemy::AttackOverlap()
+{
+	// Attacks player when in range
+	AttackDetection->OnComponentBeginOverlap.AddDynamic(this, &Arbs_Enemy::AttackRangeOverlapBegin);
+
+	// Stops attacking when no longer in range
+	AttackDetection->OnComponentEndOverlap.AddDynamic(this, &Arbs_Enemy::AttackRangeOverlapEnd);
 }
 
 

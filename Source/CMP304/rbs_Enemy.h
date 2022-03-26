@@ -64,6 +64,12 @@ public:
 			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex);
 
+	UFUNCTION()
+		void PlayerSpottedOverlap();
+
+	UFUNCTION()
+		void AttackOverlap();
+
 	// Variables 
 	bool PlayerSpotted;
 	bool InAttackRange;
