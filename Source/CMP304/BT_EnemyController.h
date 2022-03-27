@@ -13,6 +13,8 @@ class CMP304_API ABT_EnemyController : public AAIController
 	ABT_EnemyController();
 
 public:
+	
+	// Functions
 	UFUNCTION(BlueprintCallable)
 	void BeginPlay() override;
 	
@@ -28,6 +30,10 @@ public:
 	UFUNCTION()
 	void CantSeePlayer();
 
+	UFUNCTION()
+		void AttackPlayer(FVector PlayerLocation);
+
+	// Variables
 	FTimerHandle RetriggerableTimerHandle;
 	FTimerDelegate FunctionDelegate;
 

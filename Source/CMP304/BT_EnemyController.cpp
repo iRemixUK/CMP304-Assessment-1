@@ -12,18 +12,24 @@
 
 ABT_EnemyController::ABT_EnemyController()
 {
+	// Pawn sensing component
 	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
 }
 
 void ABT_EnemyController::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	// Runs behaviour tree and sensing component
 	RunTreeAndSensing();
 }
 
 void ABT_EnemyController::RunTreeAndSensing()
 {
+	// If pawn sensing sees a pawn run player spotted function
 	PawnSensing->OnSeePawn.AddDynamic(this, &ABT_EnemyController::PlayerSpotted);
+
+	// Run behaviour tree
 	RunBehaviorTree(BehaviourTree);
 }
 
@@ -33,18 +39,14 @@ void ABT_EnemyController::PlayerSpotted(APawn* PlayerPawn)
 
 	if (Player)
 	{
+		// Sets player spotted to true
 		SetPlayerSpotted(true, Player);
-		CantSeePlayer();
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player Spotted"));
 
-		FVector PlayerLocation = Player->GetActorLocation();
-		FVector Distance = PlayerLocation - GetPawn()->GetActorLocation();
+		CantSeePlayer();
 
-		// Check if guard is within 200 units of player, if so attack them. 
-		if (Distance.Size() <= 200.f)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Attacked"));
-		}
+		// Checks if player is in attack range
+		AttackPlayer(Player->GetActorLocation());
 	}
 }
 
@@ -73,4 +75,15 @@ void ABT_EnemyController::CantSeePlayer()
 	FunctionDelegate.BindUFunction(this, FName("SetPlayerSpotted"), false, GetPawn());
 
 	GetWorld()->GetTimerManager().SetTimer(RetriggerableTimerHandle, FunctionDelegate, PawnSensing->SensingInterval * 2.f, false);
+}
+
+void ABT_EnemyController::AttackPlayer(FVector PlayerLocation)
+{
+	FVector Distance = PlayerLocation - GetPawn()->GetActorLocation();
+
+	// Check if guard is within 200 units of player, if so attack them. 
+	if (Distance.Size() <= 200.f)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Attacked"));
+	}
 }

@@ -15,12 +15,12 @@ Arbs_Enemy::Arbs_Enemy()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// Player detection component
 	PlayerDetection =CreateDefaultSubobject<USphereComponent>(TEXT("Player Collision Detection"));
-
 	PlayerDetection->SetupAttachment(RootComponent);
 
+	// Attack detection component
 	AttackDetection =CreateDefaultSubobject<USphereComponent>(TEXT("Player Attack Collision Detection"));
-
 	AttackDetection->SetupAttachment(RootComponent);
 }
 
@@ -35,7 +35,10 @@ void Arbs_Enemy::BeginPlay()
 		// AIMoveFinished connected to on request finished event which lets us know when the ai movement has finished.
 		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &Arbs_Enemy::AIMoveFinished);
 
+		// Player overlaps the player detection component
 		PlayerSpottedOverlap();
+
+		// Player overalaps the attack detection component
 		AttackOverlap();
 }
 
@@ -95,6 +98,7 @@ void Arbs_Enemy::PlayerSpottedOverlapBegin(UPrimitiveComponent* OverlappedComp, 
 
 	if (Player)
 	{
+		// Find player and move to them
 		PlayerSpotted = true;
 		FindPlayer();
 	}
@@ -153,6 +157,3 @@ void Arbs_Enemy::AttackOverlap()
 	// Stops attacking when no longer in range
 	AttackDetection->OnComponentEndOverlap.AddDynamic(this, &Arbs_Enemy::AttackRangeOverlapEnd);
 }
-
-
-
